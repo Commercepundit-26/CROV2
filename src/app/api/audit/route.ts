@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   const id = url.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing job id' }, { status: 400 });
 
-  const job = await redis.get(\`job:\${id}\`);
+  const job = await redis.get(`job:${id}`);
   if (!job) {
     return NextResponse.json({ error: 'Job not found' }, { status: 404 });
   }

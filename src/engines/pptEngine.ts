@@ -24,7 +24,7 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   pptx.layout = 'LAYOUT_16x9';
   pptx.author = 'CRO-X Platform';
   pptx.company = 'Commerce Pundit';
-  pptx.title = \`CRO Audit for \${audit.clientUrl}\`;
+  pptx.title = `CRO Audit for ${audit.clientUrl}`;
 
   // Define Master Slide
   pptx.defineSlideMaster({
@@ -40,8 +40,8 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   // Title Slide
   const titleSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
   titleSlide.addText('Conversion Rate Optimization Audit', { x: 1, y: 2, w: 8, h: 1, fontSize: 36, bold: true, color: '0A66C2', align: 'center' });
-  titleSlide.addText(\`Prepared for: \${audit.clientUrl}\`, { x: 1, y: 3.5, w: 8, h: 0.5, fontSize: 20, color: '333333', align: 'center' });
-  titleSlide.addText(\`Date: \${new Date().toLocaleDateString()}\`, { x: 1, y: 4, w: 8, h: 0.5, fontSize: 16, color: '666666', align: 'center' });
+  titleSlide.addText(`Prepared for: ${audit.clientUrl}`, { x: 1, y: 3.5, w: 8, h: 0.5, fontSize: 20, color: '333333', align: 'center' });
+  titleSlide.addText(`Date: ${new Date().toLocaleDateString()}`, { x: 1, y: 4, w: 8, h: 0.5, fontSize: 16, color: '666666', align: 'center' });
 
   // Group issues by pageType
   const issuesByPage: Record<string, AIEnrichedIssue[]> = {};
@@ -55,7 +55,7 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   for (const [pageType, issues] of Object.entries(issuesByPage)) {
     // Divider Slide
     const dividerSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-    dividerSlide.addText(\`\${pageType.toUpperCase()} ISSUES\`, { x: 1, y: 2.5, w: 8, h: 1, fontSize: 32, bold: true, color: '0A66C2', align: 'center' });
+    dividerSlide.addText(`${pageType.toUpperCase()} ISSUES`, { x: 1, y: 2.5, w: 8, h: 1, fontSize: 32, bold: true, color: '0A66C2', align: 'center' });
 
     // Issue Slides
     for (const issue of issues) {
@@ -63,7 +63,7 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
       
       // Left side text
       slide.addText(issue.ai?.title || issue.title, { x: 0.5, y: 0.8, w: 4.5, h: 0.6, fontSize: 20, bold: true, color: '0A66C2' });
-      slide.addText(\`Severity: \${issue.severity.toUpperCase()}\`, { x: 0.5, y: 1.4, w: 4.5, h: 0.3, fontSize: 12, bold: true, color: issue.severity === 'high' ? 'FF0000' : 'FFA500' });
+      slide.addText(`Severity: ${issue.severity.toUpperCase()}`, { x: 0.5, y: 1.4, w: 4.5, h: 0.3, fontSize: 12, bold: true, color: issue.severity === 'high' ? 'FF0000' : 'FFA500' });
       
       slide.addText('Description:', { x: 0.5, y: 1.8, w: 4.5, h: 0.3, fontSize: 12, bold: true });
       slide.addText(issue.ai?.description || issue.description, { x: 0.5, y: 2.1, w: 4.5, h: 0.8, fontSize: 11, valign: 'top' });
@@ -93,8 +93,8 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
     for (const feat of audit.missingFeatures) {
       const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
       
-      slide.addText(\`Missing Feature: \${feat.ruleId}\`, { x: 0.5, y: 0.8, w: 4.5, h: 0.6, fontSize: 20, bold: true, color: '0A66C2' });
-      slide.addText(\`Competitor: \${feat.competitorUrl}\`, { x: 0.5, y: 1.4, w: 4.5, h: 0.4, fontSize: 14, italic: true });
+      slide.addText(`Missing Feature: ${feat.ruleId}`, { x: 0.5, y: 0.8, w: 4.5, h: 0.6, fontSize: 20, bold: true, color: '0A66C2' });
+      slide.addText(`Competitor: ${feat.competitorUrl}`, { x: 0.5, y: 1.4, w: 4.5, h: 0.4, fontSize: 14, italic: true });
       
       slide.addText(feat.evidence?.note || 'Competitor successfully implements this rule, providing a better user experience.', { x: 0.5, y: 2.0, w: 4.5, h: 1.5, fontSize: 12, valign: 'top' });
 
@@ -159,5 +159,5 @@ export async function testPptGeneration() {
   const buffer = await generatePresentation(sampleAudit);
   const outPath = path.join(process.cwd(), 'sample_audit.pptx');
   fs.writeFileSync(outPath, buffer);
-  console.log(\`Saved test presentation to \${outPath}\`);
+  console.log(`Saved test presentation to ${outPath}`);
 }

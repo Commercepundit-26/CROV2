@@ -18,9 +18,9 @@ export async function startAudit(clientUrl: string, competitorUrls: string[], cu
     createdAt: Date.now()
   };
 
-  await redis.set(\`job:\${jobId}\`, job);
+  await redis.set(`job:${jobId}`, job);
 
-  const workerUrl = \`\${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/worker\`;
+  const workerUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/worker`;
   
   if (process.env.QSTASH_TOKEN) {
     await qstashClient.publishJSON({

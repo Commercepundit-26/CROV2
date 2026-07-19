@@ -91,10 +91,8 @@ export default function Home() {
                 <h2 className="text-3xl font-bold">Audit Completed</h2>
                 <p className="text-gray-500 mt-2">Found {result.issues?.length || 0} optimization opportunities.</p>
               </div>
-              <Button asChild className="bg-[#0A66C2] hover:bg-blue-700 text-white" size="lg">
-                <a href={result.downloadUrl} target="_blank" rel="noreferrer">
-                  <DownloadCloud className="w-5 h-5 mr-2" /> Download PPT
-                </a>
+              <Button onClick={() => window.open(result.downloadUrl, '_blank')} className="bg-[#0A66C2] hover:bg-blue-700 text-white" size="lg">
+                <DownloadCloud className="w-5 h-5 mr-2" /> Download PPT
               </Button>
             </div>
 

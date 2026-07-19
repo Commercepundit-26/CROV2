@@ -40,7 +40,7 @@ export async function discoverCompetitors(clientUrl: string, clientIndustry?: st
   }
 
   const firecrawl = new FirecrawlApp({ apiKey });
-  const query = clientIndustry ? \`top \${clientIndustry} websites similar to \${clientUrl}\` : \`websites similar to \${clientUrl} competitors\`;
+  const query = clientIndustry ? `top ${clientIndustry} websites similar to ${clientUrl}` : `websites similar to ${clientUrl} competitors`;
 
   try {
     // Perform search using Firecrawl
@@ -57,7 +57,7 @@ export async function discoverCompetitors(clientUrl: string, clientIndustry?: st
     // Get embedding for client
     const clientEmbeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
-      input: clientIndustry ? \`\${clientIndustry} business at \${clientUrl}\` : clientUrl,
+      input: clientIndustry ? `${clientIndustry} business at ${clientUrl}` : clientUrl,
     });
     const clientVector = clientEmbeddingResponse.data[0].embedding;
 

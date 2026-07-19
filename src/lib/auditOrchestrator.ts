@@ -79,7 +79,7 @@ export async function runAuditPipeline(jobId: string, clientUrl: string, competi
     const pptBuffer = await generatePresentation(auditData);
     
     // Upload PPT to Supabase Storage
-    const fileName = \`audit-\${jobId}.pptx\`;
+    const fileName = `audit-${jobId}.pptx`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('audits')
       .upload(fileName, pptBuffer, { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });

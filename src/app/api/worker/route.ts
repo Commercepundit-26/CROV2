@@ -18,19 +18,19 @@ async function handler(req: Request) {
   
   if (!jobId) return NextResponse.json({ error: 'Missing jobId' }, { status: 400 });
 
-  const jobStr = await redis.get(\`job:\${jobId}\`);
+  const jobStr = await redis.get(`job:${jobId}`);
   if (!jobStr) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
   const job = (typeof jobStr === 'string' ? JSON.parse(jobStr) : jobStr) as AuditJob;
 
   try {
     job.status = 'running';
     job.progress = 10;
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
 
     // 1. Crawl
     const crawlResult = await crawlSite(job.clientUrl, { maxPages: 2 });
     job.progress = 30;
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
 
     // 2. Detect & Rules
     const ruleEngine = new RuleEngine();
@@ -58,7 +58,7 @@ async function handler(req: Request) {
     await browser.close();
     
     job.progress = 60;
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
 
     // 3. Competitors
     let comps = job.competitorUrls;
@@ -69,7 +69,7 @@ async function handler(req: Request) {
     const missingFeatures = await compareWithCompetitors(allIssues, {}, []);
     
     job.progress = 80;
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
 
     // 4. Generate PPT
     const auditData: AuditResult = {
@@ -82,7 +82,7 @@ async function handler(req: Request) {
     const pptBuffer = await generatePresentation(auditData);
     
     // Upload to Supabase
-    const fileName = \`audit-\${jobId}.pptx\`;
+    const fileName = `audit-${jobId}.pptx`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('audits')
       .upload(fileName, pptBuffer, { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', upsert: true });
@@ -97,14 +97,14 @@ async function handler(req: Request) {
     job.status = 'completed';
     job.progress = 100;
     job.result = { downloadUrl, issues: allIssues };
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Worker error:', error);
     job.status = 'failed';
     job.result = { downloadUrl: '', issues: [] } as any; // Adding error to result type would be better
-    await redis.set(\`job:\${jobId}\`, job);
+    await redis.set(`job:${jobId}`, job);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

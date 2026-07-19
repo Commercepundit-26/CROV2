@@ -63,13 +63,13 @@ export class RuleEngine {
               id: crypto.randomUUID(),
               rule_id: rule.id,
               severity: check.severity,
-              title: \`Check failed: \${check.id}\`,
+              title: `Check failed: ${check.id}`,
               description: check.description,
               bounding_box: component.bbox
             });
           }
         } catch (err: any) {
-          console.warn(\`Failed to evaluate rule \${check.id} for \${rule.id}: \${err.message}\`);
+          console.warn(`Failed to evaluate rule ${check.id} for ${rule.id}: ${err.message}`);
         }
       } else if (check.type === 'nlp') {
         // AI check handled elsewhere
@@ -77,7 +77,7 @@ export class RuleEngine {
           id: crypto.randomUUID(),
           rule_id: rule.id,
           severity: check.severity,
-          title: \`Needs AI analysis: \${check.id}\`,
+          title: `Needs AI analysis: ${check.id}`,
           description: check.description,
           bounding_box: component.bbox
         });

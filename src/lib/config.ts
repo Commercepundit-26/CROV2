@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
-  OPENAI_API_KEY: z.string().min(1).optional(),
-  FIRECRAWL_API_KEY: z.string().min(1).optional(),
-  REDIS_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  FIRECRAWL_API_KEY: z.string().optional(),
+  REDIS_URL: z.string().optional(),
 });
 
 export const config = envSchema.parse({

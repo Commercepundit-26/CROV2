@@ -17,7 +17,7 @@ const AIOutputSchema = z.object({
 const cache = new Map<string, AIOutput>();
 
 export async function generateIssueExplanation(issue: Issue, rule: Rule, evidence: Record<string, any>): Promise<AIOutput> {
-  const cacheKey = \`\${issue.id}_\${rule.version}_\${JSON.stringify(evidence)}\`;
+  const cacheKey = `${issue.id}_${rule.version}_${JSON.stringify(evidence)}`;
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey)!;
   }
@@ -31,13 +31,13 @@ export async function generateIssueExplanation(issue: Issue, rule: Rule, evidenc
   
   // Basic string replacement for common placeholders
   for (const [key, value] of Object.entries(evidence)) {
-    promptText = promptText.replace(new RegExp(\`{{\${key}}}\`, 'g'), String(value));
+    promptText = promptText.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
   }
   
   // In case of more complex templates (like failed_checks), we append the raw evidence as context.
-  promptText += \`\n\nIssue Details: \${JSON.stringify(issue)}\`;
-  promptText += \`\nEvidence Data: \${JSON.stringify(evidence)}\`;
-  promptText += \`\n\nPlease output valid JSON adhering to the following schema: { title: string, description: string, businessImpact: string, recommendation: string, confidence: number }\`;
+  promptText += `nnIssue Details: ${JSON.stringify(issue)}`;
+  promptText += `nEvidence Data: ${JSON.stringify(evidence)}`;
+  promptText += `nnPlease output valid JSON adhering to the following schema: { title: string, description: string, businessImpact: string, recommendation: string, confidence: number }`;
 
   const systemMessage = "You are a CRO expert for Commerce Pundit. Provide concise, evidence-backed explanations.";
 
@@ -66,7 +66,7 @@ export async function generateIssueExplanation(issue: Issue, rule: Rule, evidenc
           { role: "system", content: systemMessage },
           { 
             role: "user", 
-            content: \`Please provide a simple JSON explanation for this issue based on rule \${rule.id}. Ensure fields match: title, description, businessImpact, recommendation, confidence.\n\n\${promptText}\` 
+            content: `Please provide a simple JSON explanation for this issue based on rule ${rule.id}. Ensure fields match: title, description, businessImpact, recommendation, confidence.nn${promptText}` 
           }
         ],
         response_format: { type: "json_object" },
@@ -80,10 +80,10 @@ export async function generateIssueExplanation(issue: Issue, rule: Rule, evidenc
     } catch (retryError) {
       // Fallback
       const fallback: AIOutput = {
-        title: \`Issue detected for \${rule.id}\`,
-        description: \`An issue was flagged but AI analysis failed.\`,
-        businessImpact: \`Needs manual review to determine impact.\`,
-        recommendation: \`Investigate component for compliance with rule \${rule.id}.\`,
+        title: `Issue detected for ${rule.id}`,
+        description: `An issue was flagged but AI analysis failed.`,
+        businessImpact: `Needs manual review to determine impact.`,
+        recommendation: `Investigate component for compliance with rule ${rule.id}.`,
         confidence: 0
       };
       

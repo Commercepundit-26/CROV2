@@ -31,7 +31,7 @@ export async function compareWithCompetitors(
           // Since we don't store "passing evidence", we just note the missing feature
           // We could potentially store something from the competitor's crawled data in the future
           evidence: {
-            note: \`Competitor \${competitorUrl} successfully implements \${ruleId}\`,
+            note: `Competitor ${competitorUrl} successfully implements ${ruleId}`,
             clientFailedCheck: clientIssue.title
           }
         });
