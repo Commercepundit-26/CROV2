@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     if (process.env.QSTASH_TOKEN) {
       await qstashClient.publishJSON({ url: `${baseUrl}/api/worker/generate`, body: { jobId } });
     } else {
-      fetch(`${baseUrl}/api/worker/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) }).catch(console.error);
+      await fetch(`${baseUrl}/api/worker/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
     }
     return NextResponse.json({ success: true });
   } catch (error: any) {

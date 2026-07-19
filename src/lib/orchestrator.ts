@@ -30,12 +30,12 @@ export async function startAudit(clientUrl: string, competitorUrls: string[], cu
       body: { jobId }
     });
   } else {
-    // Local fallback
-    fetch(workerUrl, {
+    // Local fallback: await the fetch so Vercel doesn't kill the background promise
+    await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jobId })
-    }).catch(console.error);
+    });
   }
 
   return jobId;
