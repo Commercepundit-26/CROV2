@@ -28,24 +28,8 @@ export async function POST(req: Request) {
     const ruleEngine = new RuleEngine();
     let allIssues: AIEnrichedIssue[] = [];
     
-    if (true) { // FORCED MOCK FOR MVP DEMONSTRATION
-      console.warn("Forcing mock DOM for analysis demonstration.");
-      allIssues = [{
-        id: 'mock-1',
-        rule_id: 'R1',
-        severity: 'high',
-        description: 'Mock issue',
-        element: 'div',
-        recommendation: 'Mock fix',
-        pageType: 'homepage',
-        ai: {
-          title: 'Mock Issue',
-          description: 'A mock issue because Browserless is disabled.',
-          businessImpact: 'High',
-          recommendation: 'Fix it',
-          confidence: 90
-        }
-      }];
+    if (false) { // MOCK DISABLED - NOW USING REAL ENGINE
+      console.warn("Mock disabled.");
     } else {
       const browser = await chromium.connect({ wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}` });
       const context = await browser.newContext();
@@ -58,12 +42,52 @@ export async function POST(req: Request) {
         const evidenceMap = new Map<string, any>(); 
         const issues = await ruleEngine.evaluateAllRulesForPage(detectedPage, evidenceMap);
         
+        // Enhance with AI and Capture Screenshots
         const aiPromises = issues.map(async (issue: any) => {
           const rule = { id: issue.rule_id, version: '1', description: '', checks: [], required_evidence: [], ai_prompt_template: 'Analyze' };
           const aiExp = await generateExplanations([issue], rule, { actual: 'detected issue' });
-          return { ...issue, pageType: pageData.pageType, ai: aiExp[0] };
+          
+          let screenshotUrl = '';
+          try {
+             if (issue.element) {
+               // Inject a massive red bounding box around the element!
+               await page.evaluate((selector) => {
+                 const el = document.querySelector(selector);
+                 if (el) {
+                   el.style.border = '5px solid red';
+                   el.style.boxShadow = '0 0 20px red';
+                   el.scrollIntoView({ behavior: 'instant', block: 'center' });
+                 }
+               }, issue.element);
+               
+               const screenshotBuffer = await page.screenshot({ type: 'jpeg', quality: 60 });
+               
+               // Upload screenshot to Supabase to prevent Redis Payload too large errors
+               const { createClient } = await import('@supabase/supabase-js');
+               const supabase = createClient(
+                  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                  process.env.SUPABASE_SERVICE_ROLE_KEY!
+               );
+               const fileName = `screenshots/audit-${jobId}-rule-${issue.rule_id}-${Date.now()}.jpg`;
+               const { error: uploadErr } = await supabase.storage
+                 .from('audits')
+                 .upload(fileName, screenshotBuffer, { contentType: 'image/jpeg' });
+                 
+               if (!uploadErr) {
+                 const { data } = supabase.storage.from('audits').getPublicUrl(fileName);
+                 screenshotUrl = data.publicUrl;
+               }
+             }
+          } catch (e) { console.error("Screenshot error", e); }
+
+          return { ...issue, pageType: pageData.pageType, ai: aiExp[0], evidence: { ...issue.evidence, screenshotUrl } };
         });
-        const enrichedIssues = await Promise.all(aiPromises);
+        
+        // Wait for all AI and screenshot captures to finish
+        const enrichedIssues = [];
+        for (const p of aiPromises) {
+           enrichedIssues.push(await p); // Sequential to avoid Playwright context race conditions on the same page
+        }
         allIssues.push(...enrichedIssues);
       }
       await browser.close();

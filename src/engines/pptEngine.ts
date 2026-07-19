@@ -75,20 +75,36 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
       const issue = issues[idx];
       const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
       
-      slide.addText(`Issue ${idx + 1}: ${issue.ai?.title || issue.title}`, { x: 0.5, y: 0.7, w: 9, h: 0.8, fontSize: 24, color: THEME.primary, bold: true, fontFace: THEME.fontFace });
+      // Left side text container
+      slide.addText(`Issue ${idx + 1}: ${issue.ai?.title || issue.title}`, { x: 0.5, y: 0.7, w: 4.5, h: 0.8, fontSize: 24, color: THEME.primary, bold: true, fontFace: THEME.fontFace, breakLine: true });
 
+      // Detailed Observation Pointers
       slide.addText('Observation', { x: 0.5, y: 1.6, w: 4.5, h: 0.3, fontSize: 16, color: THEME.secondary, bold: true, fontFace: THEME.fontFace });
-      slide.addText(issue.ai?.description || 'Detected via automated heuristic check.', { x: 0.5, y: 2.0, w: 4.5, h: 1.2, fontSize: 14, color: THEME.text, fontFace: THEME.bodyFontFace, valign: 'top' });
+      const obsBullets = [
+        { text: issue.ai?.description || 'Detected via automated heuristic check.', options: { bullet: true, color: THEME.text, fontFace: THEME.bodyFontFace } },
+        { text: `Severity: ${issue.severity?.toUpperCase() || 'MEDIUM'}`, options: { bullet: true, color: issue.severity === 'high' ? 'FF0000' : THEME.text, bold: true, fontFace: THEME.bodyFontFace } },
+        { text: `Business Impact: ${issue.ai?.businessImpact || 'Moderate impact on conversion rates.'}`, options: { bullet: true, color: THEME.text, fontFace: THEME.bodyFontFace } }
+      ];
+      slide.addText(obsBullets, { x: 0.5, y: 2.0, w: 4.5, h: 1.2, fontSize: 13, valign: 'top' });
 
+      // Detailed Recommendation Pointers
       slide.addText('Recommendation', { x: 0.5, y: 3.4, w: 4.5, h: 0.3, fontSize: 16, color: THEME.accent, bold: true, fontFace: THEME.fontFace });
-      slide.addText(issue.ai?.recommendation || 'Consider optimizing this element for better conversion.', { x: 0.5, y: 3.8, w: 4.5, h: 1.2, fontSize: 14, color: THEME.text, fontFace: THEME.bodyFontFace, valign: 'top' });
+      const recBullets = [
+        { text: issue.ai?.recommendation || 'Consider optimizing this element for better conversion.', options: { bullet: true, color: THEME.text, fontFace: THEME.bodyFontFace } },
+        { text: 'A/B test this change against the original variation to measure lift.', options: { bullet: true, color: THEME.text, fontFace: THEME.bodyFontFace } }
+      ];
+      slide.addText(recBullets, { x: 0.5, y: 3.8, w: 4.5, h: 1.2, fontSize: 13, valign: 'top' });
 
-      // Right side image
-      if (issue.evidence?.screenshot) {
-        slide.addImage({ data: issue.evidence.screenshot, x: 5.2, y: 1.2, w: 4.5, h: 3.375, sizing: { type: 'contain', w: 4.5, h: 3.375 } });
+      // Right side image (Supabase Screenshot URL)
+      if (issue.evidence?.screenshotUrl) {
+        // pptxgenjs accepts external URLs directly for image paths
+        slide.addImage({ path: issue.evidence.screenshotUrl, x: 5.2, y: 0.7, w: 4.5, h: 4.3, sizing: { type: 'contain', w: 4.5, h: 4.3 } });
+      } else if (issue.evidence?.screenshot) {
+        // Fallback to base64 if it somehow managed to survive the queue limit
+        slide.addImage({ data: issue.evidence.screenshot, x: 5.2, y: 0.7, w: 4.5, h: 4.3, sizing: { type: 'contain', w: 4.5, h: 4.3 } });
       } else {
-        slide.addShape(pptx.ShapeType.rect, { x: 5.2, y: 1.2, w: 4.5, h: 3.375, fill: { color: 'F0F0F0' } });
-        slide.addText('No screenshot available', { x: 5.2, y: 1.2, w: 4.5, h: 3.375, align: 'center', color: '999999' });
+        slide.addShape(pptx.ShapeType.rect, { x: 5.2, y: 0.7, w: 4.5, h: 4.3, fill: { color: 'F0F0F0' } });
+        slide.addText('No screenshot available (Headless browser restricted)', { x: 5.2, y: 0.7, w: 4.5, h: 4.3, align: 'center', color: '999999' });
       }
     }
   }
@@ -122,11 +138,11 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   // Overall Recommendations Slide
   if (audit.recommendations && audit.recommendations.length > 0) {
     const recSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-    recSlide.addText('Overall Recommendations', { x: 0.5, y: 0.8, w: 9, h: 0.6, fontSize: 24, bold: true, color: '0A66C2' });
+    recSlide.addText('Overall Recommendations', { x: 0.5, y: 0.8, w: 9, h: 0.6, fontSize: 24, bold: true, color: THEME.primary, fontFace: THEME.fontFace });
     
     // Formatting as bullet points
     const bullets = audit.recommendations.map(r => ({ text: r, options: { bullet: true } }));
-    recSlide.addText(bullets, { x: 0.5, y: 1.5, w: 9, h: 3.5, fontSize: 14, valign: 'top', margin: 10 });
+    recSlide.addText(bullets, { x: 0.5, y: 1.5, w: 9, h: 3.5, fontSize: 14, valign: 'top', margin: 10, color: THEME.text, fontFace: THEME.bodyFontFace });
   }
 
   // Generate buffer
