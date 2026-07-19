@@ -1,0 +1,29 @@
+id: nav.structure
+version: 1.0.0
+description: "Navigation must have optimal item count, search, and stickiness."
+checks:
+  - id: nav_item_count
+    type: code
+    rule: "document.querySelectorAll('nav > ul > li').length <= 7"
+    description: "Max 7 top-level nav items"
+    severity: medium
+  - id: nav_search
+    type: code
+    rule: "document.querySelectorAll('input[type="search"], [data-cro-search]').length > 0"
+    description: "Search bar is present"
+    severity: medium
+  - id: nav_sticky
+    type: code
+    rule: "getComputedStyle(nav).position === 'sticky' || getComputedStyle(nav).position === 'fixed'"
+    description: "Navigation is sticky"
+    severity: low
+required_evidence:
+  - screenshot
+  - bounding_box
+  - computed_styles
+ai_prompt_template: |
+  The navigation has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

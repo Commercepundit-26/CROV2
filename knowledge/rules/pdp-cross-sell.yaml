@@ -1,0 +1,18 @@
+id: pdp.cross_sell
+version: 1.0.0
+description: "PDP must contain related products or cross-sells."
+checks:
+  - id: cross_sell_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-related-products]').length > 0"
+    description: "Related products section is present"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The PDP cross-sell section has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

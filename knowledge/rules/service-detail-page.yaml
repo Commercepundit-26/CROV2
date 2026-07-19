@@ -1,0 +1,29 @@
+id: service.detail
+version: 1.0.0
+description: "Service detail page must have description, process, deliverables, and CTA."
+checks:
+  - id: service_desc
+    type: nlp
+    rule: "containsDescription(page.text)"
+    description: "Service description is present"
+    severity: high
+  - id: service_process
+    type: nlp
+    rule: "containsProcess(page.text)"
+    description: "Process is outlined"
+    severity: medium
+  - id: service_cta
+    type: code
+    rule: "document.querySelectorAll('button[data-cro-cta]').length > 0"
+    description: "CTA is present"
+    severity: high
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The service detail page has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

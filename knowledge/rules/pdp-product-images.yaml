@@ -1,0 +1,23 @@
+id: pdp.images
+version: 1.0.0
+description: "PDP must have multiple high-quality images and zoom capability."
+checks:
+  - id: image_count
+    type: code
+    rule: "document.querySelectorAll('.product-gallery img').length >= 3"
+    description: "At least 3 product images"
+    severity: high
+  - id: image_zoom
+    type: nlp
+    rule: "hasZoomCapability(gallery)"
+    description: "Images have zoom capability"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The PDP product images have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

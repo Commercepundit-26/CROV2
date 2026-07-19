@@ -1,0 +1,28 @@
+id: pdp.details
+version: 1.0.0
+description: "PDP must include description, specs, shipping, and returns information."
+checks:
+  - id: details_description
+    type: nlp
+    rule: "containsDescription(page.text)"
+    description: "Product description is present"
+    severity: high
+  - id: details_shipping
+    type: nlp
+    rule: "containsShippingInfo(page.text)"
+    description: "Shipping information is visible"
+    severity: high
+  - id: details_returns
+    type: nlp
+    rule: "containsReturnsInfo(page.text)"
+    description: "Returns information is visible"
+    severity: medium
+required_evidence:
+  - screenshot
+  - text_content
+ai_prompt_template: |
+  The PDP details have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

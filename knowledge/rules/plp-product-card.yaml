@@ -1,0 +1,34 @@
+id: plp.product_card
+version: 1.0.0
+description: "Product cards on PLP must have image, name, price, rating, and ATC."
+checks:
+  - id: card_image
+    type: code
+    rule: "card.querySelector('img') !== null"
+    description: "Product image is present"
+    severity: high
+  - id: card_price
+    type: nlp
+    rule: "containsPrice(card.text)"
+    description: "Product price is visible"
+    severity: high
+  - id: card_rating
+    type: code
+    rule: "card.querySelector('.rating, [data-cro-rating]') !== null"
+    description: "Product rating is visible"
+    severity: medium
+  - id: card_atc
+    type: code
+    rule: "card.querySelector('button') !== null"
+    description: "Add to Cart button is present"
+    severity: high
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The PLP product card has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

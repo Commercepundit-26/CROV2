@@ -1,0 +1,29 @@
+id: trust.testimonial
+version: 1.0.0
+description: "Testimonials must have presence, photo, name, and be near CTA."
+checks:
+  - id: testimonial_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-testimonial]').length > 0"
+    description: "Testimonial is present"
+    severity: high
+  - id: testimonial_photo
+    type: code
+    rule: "testimonial.querySelector('img') !== null"
+    description: "Testimonial has author photo"
+    severity: medium
+  - id: testimonial_near_cta
+    type: nlp
+    rule: "isNear(testimonial, cta)"
+    description: "Testimonial is close to CTA"
+    severity: low
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The testimonials have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

@@ -1,0 +1,29 @@
+id: lead.contact_form
+version: 1.0.0
+description: "Contact form must have appropriate fields, privacy checkbox, and submit button."
+checks:
+  - id: form_fields_count
+    type: code
+    rule: "document.querySelectorAll('form input:not([type="hidden"])').length <= 5"
+    description: "Max 5 visible fields"
+    severity: medium
+  - id: privacy_checkbox
+    type: code
+    rule: "document.querySelectorAll('input[type="checkbox"][name*="privacy"]').length > 0"
+    description: "Privacy checkbox is present"
+    severity: low
+  - id: submit_button
+    type: code
+    rule: "document.querySelectorAll('button[type="submit"]').length > 0"
+    description: "Submit button is present"
+    severity: high
+required_evidence:
+  - screenshot
+  - bounding_box
+  - dom_snippet
+ai_prompt_template: |
+  The contact form has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

@@ -1,0 +1,18 @@
+id: trust.case_studies
+version: 1.0.0
+description: "Case studies must be present to build trust."
+checks:
+  - id: case_studies_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-case-study]').length >= 2"
+    description: "At least 2 case studies present"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The case studies have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

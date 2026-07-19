@@ -1,0 +1,29 @@
+id: service_home.hero
+version: 1.0.0
+description: "Service homepage hero must have headline, CTA, and trust signals."
+checks:
+  - id: hero_headline
+    type: code
+    rule: "document.querySelectorAll('h1').length > 0"
+    description: "Headline is present"
+    severity: high
+  - id: hero_cta
+    type: code
+    rule: "document.querySelectorAll('button[data-cro-cta]').length > 0"
+    description: "CTA is present"
+    severity: high
+  - id: hero_trust
+    type: nlp
+    rule: "containsTrustSignals(hero.text)"
+    description: "Trust signals in hero"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The service homepage hero has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

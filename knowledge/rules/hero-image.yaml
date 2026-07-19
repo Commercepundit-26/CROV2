@@ -1,0 +1,29 @@
+id: hero.image
+version: 1.0.0
+description: "Hero image or video must be present, optimized, and have alt text."
+checks:
+  - id: image_presence
+    type: code
+    rule: "document.querySelectorAll('img[data-cro-hero], video[data-cro-hero]').length > 0"
+    description: "Hero image/video is present"
+    severity: high
+  - id: image_alt_text
+    type: code
+    rule: "img.alt && img.alt.length > 0"
+    description: "Hero image has alt text"
+    severity: medium
+  - id: image_optimization
+    type: nlp
+    rule: "isOptimizedFormat(img.src)"
+    description: "Hero media is optimized"
+    severity: low
+required_evidence:
+  - screenshot
+  - bounding_box
+  - dom_snippet
+ai_prompt_template: |
+  The hero image has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

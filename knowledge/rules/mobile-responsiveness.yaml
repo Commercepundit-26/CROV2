@@ -1,0 +1,28 @@
+id: usability.mobile
+version: 1.0.0
+description: "Page must be mobile responsive with correct viewport meta, touch targets, and readable font sizes."
+checks:
+  - id: viewport_meta
+    type: code
+    rule: "document.querySelector('meta[name="viewport"]') !== null"
+    description: "Viewport meta tag exists"
+    severity: high
+  - id: touch_targets
+    type: code
+    rule: "button.width >= 44 && button.height >= 44"
+    description: "Touch targets are adequately sized"
+    severity: high
+  - id: font_size
+    type: code
+    rule: "parseFloat(getComputedStyle(p).fontSize) >= 16"
+    description: "Base font size is at least 16px"
+    severity: medium
+required_evidence:
+  - screenshot
+  - computed_styles
+ai_prompt_template: |
+  The mobile responsiveness has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

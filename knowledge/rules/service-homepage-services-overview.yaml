@@ -1,0 +1,23 @@
+id: service_home.overview
+version: 1.0.0
+description: "Service homepage must list services with links to details."
+checks:
+  - id: services_list
+    type: code
+    rule: "document.querySelectorAll('[data-cro-service-item]').length >= 3"
+    description: "At least 3 services listed"
+    severity: high
+  - id: services_links
+    type: code
+    rule: "serviceItem.querySelector('a') !== null"
+    description: "Services link to details"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The service overview has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

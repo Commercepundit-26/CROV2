@@ -1,101 +1,121 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { AuditForm } from "@/components/AuditForm";
+import { IssueSummary } from "@/components/IssueSummary";
+import { ChatPanel } from "@/components/ChatPanel";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { startAudit, getAuditStatus, sendChatMessage } from "@/lib/api";
+import { DownloadCloud } from "lucide-react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("");
+  const [progress, setProgress] = useState(0);
+  const [result, setResult] = useState<any>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    if (!jobId || status === "completed" || status === "failed") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const job = await getAuditStatus(jobId);
+        setStatus(job.status);
+        setProgress(job.progress);
+        if (job.status === "completed") {
+          setResult(job.result);
+        } else if (job.status === "failed") {
+          alert("Audit failed. Check console.");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [jobId, status]);
+
+  const handleStartAudit = async (data: any) => {
+    try {
+      setStatus("pending");
+      setProgress(0);
+      setResult(null);
+      const res = await startAudit(data.clientUrl, data.competitorUrls, data.customInstructions);
+      setJobId(res.jobId);
+    } catch (err) {
+      alert("Failed to start audit.");
+    }
+  };
+
+  const handleChat = async (msg: string) => {
+    if (!jobId) return;
+    await sendChatMessage(jobId, 'chat', { message: msg });
+    alert("Chat instruction sent!");
+  };
+
+  return (
+    <main className="min-h-screen bg-gray-50 text-gray-900 pb-20">
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-[#0A66C2]">CRO-X</h1>
+          <span className="text-sm font-medium text-gray-500">Commerce Pundit</span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </header>
+
+      <div className="max-w-5xl mx-auto px-6 mt-12">
+        {!jobId && (
+          <div>
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-extrabold tracking-tight mb-4">Start a new CRO Audit</h2>
+              <p className="text-gray-500 text-lg">Generate deterministic, evidence-backed insights in minutes.</p>
+            </div>
+            <AuditForm onSubmit={handleStartAudit} isLoading={status === 'pending'} />
+          </div>
+        )}
+
+        {jobId && status !== 'completed' && status !== 'failed' && (
+          <div className="max-w-xl mx-auto text-center mt-20">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">
+              {status === 'crawling' ? 'Crawling pages...' : status === 'analyzing' ? 'Running heuristics...' : status === 'generating' ? 'Building presentation...' : 'Initializing...'}
+            </h3>
+            <Progress value={progress} className="h-4 w-full bg-gray-200" />
+            <p className="mt-4 text-gray-500 font-medium">{progress}% Complete</p>
+          </div>
+        )}
+
+        {status === 'completed' && result && (
+          <div className="mt-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex justify-between items-end mb-8 border-b pb-4">
+              <div>
+                <h2 className="text-3xl font-bold">Audit Completed</h2>
+                <p className="text-gray-500 mt-2">Found {result.issues?.length || 0} optimization opportunities.</p>
+              </div>
+              <Button asChild className="bg-[#0A66C2] hover:bg-blue-700 text-white" size="lg">
+                <a href={result.downloadUrl} target="_blank" rel="noreferrer">
+                  <DownloadCloud className="w-5 h-5 mr-2" /> Download PPT
+                </a>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {result.issues?.map((issue: any, idx: number) => (
+                <IssueSummary key={idx} issue={issue} />
+              ))}
+            </div>
+
+            <div className="mt-16 bg-white p-6 rounded-xl border shadow-sm text-center">
+              <h3 className="text-lg font-bold mb-2">Want to refine the presentation?</h3>
+              <p className="text-gray-500 mb-4">Use the chat below to instruct the AI engine to modify the slides.</p>
+              <ChatPanel onSendMessage={handleChat} />
+            </div>
+            
+            <div className="mt-8 text-center">
+              <Button variant="ghost" onClick={() => { setJobId(null); setStatus(""); }}>Start a New Audit</Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

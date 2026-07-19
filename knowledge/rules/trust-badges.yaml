@@ -1,0 +1,23 @@
+id: trust.badges
+version: 1.0.0
+description: "Trust badges must be present and near CTA."
+checks:
+  - id: badges_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-trust-badge]').length > 0"
+    description: "Trust badges are present"
+    severity: high
+  - id: badges_near_cta
+    type: nlp
+    rule: "isNear(badges, cta)"
+    description: "Trust badges are close to CTA"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The trust badges have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

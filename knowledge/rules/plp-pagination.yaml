@@ -1,0 +1,23 @@
+id: plp.pagination
+version: 1.0.0
+description: "PLP must have pagination and display total results count."
+checks:
+  - id: pagination_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-pagination]').length > 0"
+    description: "Pagination is present"
+    severity: high
+  - id: results_count
+    type: nlp
+    rule: "containsResultsCount(page.text)"
+    description: "Total results count is visible"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The PLP pagination has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

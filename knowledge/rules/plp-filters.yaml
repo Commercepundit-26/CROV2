@@ -1,0 +1,23 @@
+id: plp.filters
+version: 1.0.0
+description: "PLP must have filtering and sorting options."
+checks:
+  - id: filters_presence
+    type: code
+    rule: "document.querySelectorAll('[data-cro-filters]').length > 0"
+    description: "Filters are present"
+    severity: high
+  - id: sort_presence
+    type: code
+    rule: "document.querySelectorAll('select[data-cro-sort]').length > 0"
+    description: "Sorting options are present"
+    severity: high
+required_evidence:
+  - screenshot
+  - bounding_box
+ai_prompt_template: |
+  The PLP filters have these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

@@ -1,0 +1,29 @@
+id: hero.headline
+version: 1.0.0
+description: "Hero headline must be present, convey a clear value prop, and have appropriate length."
+checks:
+  - id: headline_presence
+    type: code
+    rule: "document.querySelectorAll('h1').length > 0"
+    description: "H1 headline is present"
+    severity: high
+  - id: headline_length
+    type: code
+    rule: "h1.textContent.length > 10 && h1.textContent.length < 100"
+    description: "Headline length is optimal"
+    severity: medium
+  - id: headline_value_prop
+    type: nlp
+    rule: "containsValueProp(h1.text)"
+    description: "Headline contains value proposition"
+    severity: high
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The hero headline has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

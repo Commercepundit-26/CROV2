@@ -1,0 +1,29 @@
+id: nav.footer
+version: 1.0.0
+description: "Footer must include contact info, privacy links, and sitemap."
+checks:
+  - id: footer_contact
+    type: nlp
+    rule: "containsContactInfo(footer.text)"
+    description: "Footer contains contact information"
+    severity: high
+  - id: footer_privacy
+    type: code
+    rule: "footer.querySelectorAll('a[href*="privacy"]').length > 0"
+    description: "Privacy policy link is present"
+    severity: high
+  - id: footer_sitemap
+    type: code
+    rule: "footer.querySelectorAll('ul > li > a').length > 5"
+    description: "Footer acts as a sitemap"
+    severity: low
+required_evidence:
+  - screenshot
+  - bounding_box
+  - text_content
+ai_prompt_template: |
+  The footer has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.

@@ -1,0 +1,29 @@
+id: pdp.add_to_cart
+version: 1.0.0
+description: "PDP Add to Cart button must have high contrast, size, and urgency."
+checks:
+  - id: atc_contrast
+    type: code
+    rule: "getContrastRatio(button) >= 4.5"
+    description: "ATC Contrast ratio ≥ 4.5:1"
+    severity: high
+  - id: atc_size
+    type: code
+    rule: "button.width >= 44 && button.height >= 44"
+    description: "ATC Touch target ≥44x44px"
+    severity: high
+  - id: atc_urgency
+    type: nlp
+    rule: "containsUrgency(page.text)"
+    description: "Urgency cues are present near ATC"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+  - computed_styles
+ai_prompt_template: |
+  The PDP ATC button has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.
