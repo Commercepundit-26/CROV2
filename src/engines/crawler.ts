@@ -8,7 +8,7 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
   const queue: string[] = [url];
   const baseUrl = new URL(url).origin;
 
-  if (true) { // FORCED MOCK FOR MVP DEMONSTRATION
+  if (false) { // MOCK DISABLED - REAL CRAWLER ENABLED
     console.warn("Forcing mock crawler data for demonstration.");
     return {
       pages: [{
@@ -26,7 +26,7 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
   let browser;
   try {
     browser = await chromium.connect({ 
-      wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}`,
+      wsEndpoint: `wss://chrome.browserless.io/playwright?token=${process.env.BROWSERLESS_API_KEY}`,
       timeout: 10000 
     });
   } catch (err: any) {

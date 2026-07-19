@@ -32,8 +32,8 @@ export async function POST(req: Request) {
       console.warn("Mock disabled.");
     } else {
       const browser = await chromium.connect({ 
-        wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}`,
-        timeout: 10000 // Force throw after 10s instead of hanging infinitely
+        wsEndpoint: `wss://chrome.browserless.io/playwright?token=${process.env.BROWSERLESS_API_KEY}`,
+        timeout: 10000 
       });
       const context = await browser.newContext();
       const page = await context.newPage();
