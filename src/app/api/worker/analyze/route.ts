@@ -31,10 +31,9 @@ export async function POST(req: Request) {
     if (false) { // MOCK DISABLED - NOW USING REAL ENGINE
       console.warn("Mock disabled.");
     } else {
-      const browser = await chromium.connect({ 
-        wsEndpoint: `wss://chrome.browserless.io/playwright?token=${process.env.BROWSERLESS_API_KEY}`,
-        timeout: 10000 
-      });
+      const browser = await chromium.connectOverCDP(
+        `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}`
+      );
       const context = await browser.newContext();
       const page = await context.newPage();
       

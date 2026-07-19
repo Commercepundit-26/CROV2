@@ -25,10 +25,9 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
 
   let browser;
   try {
-    browser = await chromium.connect({ 
-      wsEndpoint: `wss://chrome.browserless.io/playwright?token=${process.env.BROWSERLESS_API_KEY}`,
-      timeout: 10000 
-    });
+    browser = await chromium.connectOverCDP(
+      `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}`
+    );
   } catch (err: any) {
     console.warn("Browserless connection timed out or failed. Using mock data. Error: " + err.message);
     return {
