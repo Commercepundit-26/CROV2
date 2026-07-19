@@ -26,22 +26,35 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   pptx.company = 'Commerce Pundit';
   pptx.title = `CRO Audit for ${audit.clientUrl}`;
 
+  const THEME = {
+    primary: '1D9A78', // Teal
+    secondary: '44546A', // Dark Blue/Gray
+    accent: '8BC145', // Light Green
+    bg: 'FFFFFF',
+    text: '44546A',
+    fontFace: 'Calibri Light',
+    bodyFontFace: 'Calibri'
+  };
+
   // Define Master Slide
   pptx.defineSlideMaster({
     title: 'MASTER_SLIDE',
-    background: { color: 'FFFFFF' },
+    background: { color: THEME.bg },
     objects: [
-      { rect: { x: 0, y: 0, w: '100%', h: 0.5, fill: { color: '0A66C2' } } },
-      { text: { text: 'Commerce Pundit CRO Audit', options: { x: 0.5, y: 0.1, w: 5, h: 0.3, color: 'FFFFFF', fontSize: 14, fontFace: 'Arial' } } }
+      { rect: { x: 0, y: 0, w: '100%', h: 0.5, fill: { color: THEME.primary } } },
+      { rect: { x: 0, y: 5.3, w: '100%', h: 0.3, fill: { color: THEME.secondary } } },
+      { text: { text: 'UniformSport CRO Audit', options: { x: 0.5, y: 5.35, w: 3, h: 0.2, color: 'FFFFFF', fontSize: 10, fontFace: THEME.bodyFontFace } } },
+      { text: { text: 'Generated dynamically by CRO-X', options: { x: 6.5, y: 5.35, w: 3, h: 0.2, color: 'FFFFFF', fontSize: 10, align: 'right', fontFace: THEME.bodyFontFace } } }
     ],
-    slideNumber: { x: 9.5, y: 5.2, color: '000000', fontSize: 10 }
+    slideNumber: { x: 9.5, y: 5.35, color: 'FFFFFF', fontSize: 10 }
   });
 
   // Title Slide
   const titleSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-  titleSlide.addText('Conversion Rate Optimization Audit', { x: 1, y: 2, w: 8, h: 1, fontSize: 36, bold: true, color: '0A66C2', align: 'center' });
-  titleSlide.addText(`Prepared for: ${audit.clientUrl}`, { x: 1, y: 3.5, w: 8, h: 0.5, fontSize: 20, color: '333333', align: 'center' });
-  titleSlide.addText(`Date: ${new Date().toLocaleDateString()}`, { x: 1, y: 4, w: 8, h: 0.5, fontSize: 16, color: '666666', align: 'center' });
+  titleSlide.background = { color: THEME.primary };
+  titleSlide.addText('CRO Audit & Optimization Strategy', { x: 1, y: 2, w: 8, h: 1, fontSize: 44, color: 'FFFFFF', bold: true, align: 'center', fontFace: THEME.fontFace });
+  titleSlide.addText(audit.clientUrl, { x: 1, y: 3, w: 8, h: 0.5, fontSize: 24, color: 'E7E6E6', align: 'center', fontFace: THEME.bodyFontFace });
+  titleSlide.addText(`Generated: ${new Date().toLocaleDateString()}`, { x: 1, y: 4, w: 8, h: 0.5, fontSize: 14, color: 'E7E6E6', align: 'center', fontFace: THEME.bodyFontFace });
 
   // Group issues by pageType
   const issuesByPage: Record<string, AIEnrichedIssue[]> = {};
@@ -55,28 +68,23 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   for (const [pageType, issues] of Object.entries(issuesByPage)) {
     // Divider Slide
     const dividerSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-    dividerSlide.addText(`${pageType.toUpperCase()} ISSUES`, { x: 1, y: 2.5, w: 8, h: 1, fontSize: 32, bold: true, color: '0A66C2', align: 'center' });
+    dividerSlide.addText(`${pageType.toUpperCase()} ISSUES`, { x: 1, y: 2.5, w: 8, h: 1, fontSize: 32, bold: true, color: THEME.primary, align: 'center', fontFace: THEME.fontFace });
 
     // Issue Slides
-    for (const issue of issues) {
+    for (let idx = 0; idx < issues.length; idx++) {
+      const issue = issues[idx];
       const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
       
-      // Left side text
-      slide.addText(issue.ai?.title || issue.title, { x: 0.5, y: 0.8, w: 4.5, h: 0.6, fontSize: 20, bold: true, color: '0A66C2' });
-      slide.addText(`Severity: ${issue.severity.toUpperCase()}`, { x: 0.5, y: 1.4, w: 4.5, h: 0.3, fontSize: 12, bold: true, color: issue.severity === 'high' ? 'FF0000' : 'FFA500' });
-      
-      slide.addText('Description:', { x: 0.5, y: 1.8, w: 4.5, h: 0.3, fontSize: 12, bold: true });
-      slide.addText(issue.ai?.description || issue.description, { x: 0.5, y: 2.1, w: 4.5, h: 0.8, fontSize: 11, valign: 'top' });
-      
-      slide.addText('Business Impact:', { x: 0.5, y: 3.0, w: 4.5, h: 0.3, fontSize: 12, bold: true });
-      slide.addText(issue.ai?.businessImpact || 'N/A', { x: 0.5, y: 3.3, w: 4.5, h: 0.6, fontSize: 11, valign: 'top' });
-      
-      slide.addText('Recommendation:', { x: 0.5, y: 4.0, w: 4.5, h: 0.3, fontSize: 12, bold: true });
-      slide.addText(issue.ai?.recommendation || 'Fix the issue.', { x: 0.5, y: 4.3, w: 4.5, h: 0.8, fontSize: 11, valign: 'top', color: '006600' });
+      slide.addText(`Issue ${idx + 1}: ${issue.ai?.title || issue.title}`, { x: 0.5, y: 0.7, w: 9, h: 0.8, fontSize: 24, color: THEME.primary, bold: true, fontFace: THEME.fontFace });
+
+      slide.addText('Observation', { x: 0.5, y: 1.6, w: 4.5, h: 0.3, fontSize: 16, color: THEME.secondary, bold: true, fontFace: THEME.fontFace });
+      slide.addText(issue.ai?.description || 'Detected via automated heuristic check.', { x: 0.5, y: 2.0, w: 4.5, h: 1.2, fontSize: 14, color: THEME.text, fontFace: THEME.bodyFontFace, valign: 'top' });
+
+      slide.addText('Recommendation', { x: 0.5, y: 3.4, w: 4.5, h: 0.3, fontSize: 16, color: THEME.accent, bold: true, fontFace: THEME.fontFace });
+      slide.addText(issue.ai?.recommendation || 'Consider optimizing this element for better conversion.', { x: 0.5, y: 3.8, w: 4.5, h: 1.2, fontSize: 14, color: THEME.text, fontFace: THEME.bodyFontFace, valign: 'top' });
 
       // Right side image
       if (issue.evidence?.screenshot) {
-        // Assume screenshot is base64
         slide.addImage({ data: issue.evidence.screenshot, x: 5.2, y: 1.2, w: 4.5, h: 3.375, sizing: { type: 'contain', w: 4.5, h: 3.375 } });
       } else {
         slide.addShape(pptx.ShapeType.rect, { x: 5.2, y: 1.2, w: 4.5, h: 3.375, fill: { color: 'F0F0F0' } });
@@ -87,24 +95,28 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
 
   // Missing Features from Competitors
   if (audit.missingFeatures && audit.missingFeatures.length > 0) {
-    const compDivider = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-    compDivider.addText('COMPETITOR ANALYSIS', { x: 1, y: 2.5, w: 8, h: 1, fontSize: 32, bold: true, color: '0A66C2', align: 'center' });
+    const compSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
+    compSlide.addText('Competitor Gap Analysis', { x: 0.5, y: 0.7, w: 9, h: 0.8, fontSize: 24, color: THEME.primary, bold: true, fontFace: THEME.fontFace });
 
+    const tableData = [
+      [{ text: 'Feature', options: { bold: true, color: 'FFFFFF', fill: THEME.secondary } },
+       { text: 'Impact', options: { bold: true, color: 'FFFFFF', fill: THEME.secondary } },
+       { text: 'Recommendation', options: { bold: true, color: 'FFFFFF', fill: THEME.secondary } }]
+    ];
+    
     for (const feat of audit.missingFeatures) {
-      const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-      
-      slide.addText(`Missing Feature: ${feat.ruleId}`, { x: 0.5, y: 0.8, w: 4.5, h: 0.6, fontSize: 20, bold: true, color: '0A66C2' });
-      slide.addText(`Competitor: ${feat.competitorUrl}`, { x: 0.5, y: 1.4, w: 4.5, h: 0.4, fontSize: 14, italic: true });
-      
-      slide.addText(feat.evidence?.note || 'Competitor successfully implements this rule, providing a better user experience.', { x: 0.5, y: 2.0, w: 4.5, h: 1.5, fontSize: 12, valign: 'top' });
-
-      if (feat.evidence?.screenshot) {
-        slide.addImage({ data: feat.evidence.screenshot, x: 5.2, y: 1.2, w: 4.5, h: 3.375, sizing: { type: 'contain', w: 4.5, h: 3.375 } });
-      } else {
-        slide.addShape(pptx.ShapeType.rect, { x: 5.2, y: 1.2, w: 4.5, h: 3.375, fill: { color: 'F0F0F0' } });
-        slide.addText('Competitor screenshot pending', { x: 5.2, y: 1.2, w: 4.5, h: 3.375, align: 'center', color: '999999' });
-      }
+      tableData.push([
+        { text: feat.feature, options: { fontFace: THEME.bodyFontFace } },
+        { text: feat.impact_score.toString(), options: { fontFace: THEME.bodyFontFace } },
+        { text: feat.recommendation, options: { fontFace: THEME.bodyFontFace } }
+      ] as any);
     }
+
+    compSlide.addTable(tableData, {
+      x: 0.5, y: 1.6, w: 9,
+      color: THEME.text, border: { type: 'solid', pt: 1, color: 'E7E6E6' },
+      fontSize: 12, rowH: 0.4
+    });
   }
 
   // Overall Recommendations Slide
