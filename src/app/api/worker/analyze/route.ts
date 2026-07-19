@@ -40,10 +40,14 @@ export async function POST(req: Request) {
         await page.goto(pageData.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
         const detectedPage = await detectPage(page, pageData.url);
         const evidenceMap = new Map<string, any>(); 
-        const issues = await ruleEngine.evaluateAllRulesForPage(detectedPage, evidenceMap);
+        let issues = await ruleEngine.evaluateAllRulesForPage(detectedPage, evidenceMap);
         
-        // Enhance with AI and Capture Screenshots
-        const aiPromises = issues.map(async (issue: any) => {
+        // Limit to top 3 issues per page to strictly avoid Vercel Serverless Function timeouts (60s limit)
+        issues = issues.slice(0, 3);
+        
+        // Enhance with AI and Capture Screenshots sequentially to avoid Playwright collisions
+        const enrichedIssues = [];
+        for (const issue of issues) {
           const rule = { id: issue.rule_id, version: '1', description: '', checks: [], required_evidence: [], ai_prompt_template: 'Analyze' };
           const aiExp = await generateExplanations([issue], rule, { actual: 'detected issue' });
           
@@ -60,7 +64,18 @@ export async function POST(req: Request) {
                  }
                }, issue.element);
                
+               // Brief wait to ensure scroll completes before screenshot
+               await page.waitForTimeout(500);
                const screenshotBuffer = await page.screenshot({ type: 'jpeg', quality: 60 });
+               
+               // Remove the border so it doesn't pollute the next screenshot
+               await page.evaluate((selector) => {
+                 const el = document.querySelector(selector);
+                 if (el) {
+                   el.style.border = 'none';
+                   el.style.boxShadow = 'none';
+                 }
+               }, issue.element);
                
                // Upload screenshot to Supabase to prevent Redis Payload too large errors
                const { createClient } = await import('@supabase/supabase-js');
@@ -80,14 +95,9 @@ export async function POST(req: Request) {
              }
           } catch (e) { console.error("Screenshot error", e); }
 
-          return { ...issue, pageType: pageData.pageType, ai: aiExp[0], evidence: { ...issue.evidence, screenshotUrl } };
-        });
-        
-        // Wait for all AI and screenshot captures to finish
-        const enrichedIssues = [];
-        for (const p of aiPromises) {
-           enrichedIssues.push(await p); // Sequential to avoid Playwright context race conditions on the same page
+          enrichedIssues.push({ ...issue, pageType: pageData.pageType, ai: aiExp[0], evidence: { ...issue.evidence, screenshotUrl } });
         }
+        
         allIssues.push(...enrichedIssues);
       }
       await browser.close();
