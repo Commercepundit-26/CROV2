@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { verifySignatureAppRouter } from '@upstash/qstash/dist/nextjs';
 import { redis } from '../../../lib/redis';
 import { AuditJob } from '../../../types/job';
 import { crawlSite } from '../../../engines/crawler';
@@ -113,5 +112,4 @@ async function handler(req: Request) {
   }
 }
 
-// Wrap with QStash signature verification ONLY if in production or token is present
-export const POST = process.env.QSTASH_TOKEN ? verifySignatureAppRouter(handler) : handler;
+export const POST = handler;
