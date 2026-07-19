@@ -1,0 +1,35 @@
+id: hero.primary_cta
+version: 1.0.0
+description: "Primary CTA must be dominant, properly sized, and high contrast."
+checks:
+  - id: cta_count
+    type: code
+    rule: "document.querySelectorAll('[data-cro-cta=\"primary\"]').length === 1"
+    description: "Exactly one primary CTA"
+    severity: high
+  - id: cta_contrast
+    type: code
+    rule: "getContrastRatio(button) >= 4.5"
+    description: "Contrast ratio ≥ 4.5:1"
+    severity: high
+  - id: cta_size_desktop
+    type: code
+    rule: "button.width >= 44 && button.height >= 44"
+    description: "Touch target ≥44x44px"
+    severity: medium
+  - id: cta_label_action
+    type: nlp
+    rule: "containsActionVerb(button.text)"
+    description: "Label starts with action verb"
+    severity: medium
+required_evidence:
+  - screenshot
+  - bounding_box
+  - computed_styles (color, background-color, font-size, width, height)
+  - text_content
+ai_prompt_template: |
+  The hero CTA has these measured issues:
+  {{#each failed_checks}}
+  - {{description}}: actual {{actual}}
+  {{/each}}
+  Generate: title, description, business impact, recommendation.
