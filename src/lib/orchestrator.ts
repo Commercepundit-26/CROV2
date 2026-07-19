@@ -22,21 +22,7 @@ export async function startAudit(clientUrl: string, competitorUrls: string[], cu
   await redis.set(`job:${jobId}`, job);
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  const workerUrl = `${baseUrl}/api/worker/crawl`;
-  
-  if (process.env.QSTASH_TOKEN) {
-    await qstashClient.publishJSON({
-      url: workerUrl,
-      body: { jobId }
-    });
-  } else {
-    // Local fallback: await the fetch so Vercel doesn't kill the background promise
-    await fetch(workerUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId })
-    });
-  }
+  // Frontend now drives the pipeline, so we just return the jobId instantly.
 
   return jobId;
 }

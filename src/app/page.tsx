@@ -43,6 +43,15 @@ export default function Home() {
       setResult(null);
       const res = await startAudit(data.clientUrl, data.competitorUrls, data.customInstructions);
       setJobId(res.jobId);
+      
+      // Frontend orchestration: Drive the steps explicitly to bypass QStash/Vercel background timeouts
+      try {
+        await fetch('/api/worker/crawl', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ jobId: res.jobId }) });
+        await fetch('/api/worker/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ jobId: res.jobId }) });
+        await fetch('/api/worker/generate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ jobId: res.jobId }) });
+      } catch (stepErr) {
+        console.error("Pipeline step failed:", stepErr);
+      }
     } catch (err) {
       alert("Failed to start audit.");
     }

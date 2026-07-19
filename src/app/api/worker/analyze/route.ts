@@ -85,12 +85,7 @@ export async function POST(req: Request) {
     job.progress = 80;
     await redis.set(`job:${jobId}`, job);
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-    if (process.env.QSTASH_TOKEN) {
-      await qstashClient.publishJSON({ url: `${baseUrl}/api/worker/generate`, body: { jobId } });
-    } else {
-      await fetch(`${baseUrl}/api/worker/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId }) });
-    }
+    // Frontend orchestration drives the next step now
     return NextResponse.json({ success: true });
   } catch (error: any) {
     job.status = 'failed';
