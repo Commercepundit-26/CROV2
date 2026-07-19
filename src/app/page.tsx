@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { startAudit, getAuditStatus, sendChatMessage } from "@/lib/api";
 import { DownloadCloud } from "lucide-react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function Home() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export default function Home() {
   };
 
   return (
+    <ErrorBoundary>
     <main className="min-h-screen bg-gray-50 text-gray-900 pb-20">
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -124,5 +126,6 @@ export default function Home() {
         )}
       </div>
     </main>
+    </ErrorBoundary>
   );
 }
