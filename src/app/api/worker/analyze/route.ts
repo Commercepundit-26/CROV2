@@ -28,8 +28,8 @@ export async function POST(req: Request) {
     const ruleEngine = new RuleEngine();
     let allIssues: AIEnrichedIssue[] = [];
     
-    if (!process.env.BROWSERLESS_API_KEY) {
-      console.warn("BROWSERLESS_API_KEY missing. Using mock DOM for analysis.");
+    if (true) { // FORCED MOCK FOR MVP DEMONSTRATION
+      console.warn("Forcing mock DOM for analysis demonstration.");
       allIssues = [{
         id: 'mock-1',
         rule_id: 'R1',

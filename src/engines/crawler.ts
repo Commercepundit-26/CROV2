@@ -8,8 +8,8 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
   const queue: string[] = [url];
   const baseUrl = new URL(url).origin;
 
-  if (!process.env.BROWSERLESS_API_KEY) {
-    console.warn("BROWSERLESS_API_KEY is missing. Returning mock crawler data.");
+  if (true) { // FORCED MOCK FOR MVP DEMONSTRATION
+    console.warn("Forcing mock crawler data for demonstration.");
     return {
       pages: [{
         url,
