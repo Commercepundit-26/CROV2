@@ -8,7 +8,9 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
   const queue: string[] = [url];
   const baseUrl = new URL(url).origin;
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = process.env.BROWSERLESS_API_KEY
+    ? await chromium.connect({ wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}` })
+    : await chromium.launch({ headless: true });
   
   try {
     const context = await browser.newContext({

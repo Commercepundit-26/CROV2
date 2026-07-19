@@ -12,6 +12,8 @@ import { generatePresentation, AuditResult, AIEnrichedIssue } from '../../../eng
 import { supabase } from '../../../lib/supabase';
 import { chromium } from 'playwright';
 
+export const maxDuration = 60; // Max allowed for Vercel hobby
+
 async function handler(req: Request) {
   const body = await req.json();
   const { jobId } = body;
@@ -34,7 +36,9 @@ async function handler(req: Request) {
 
     // 2. Detect & Rules
     const ruleEngine = new RuleEngine();
-    const browser = await chromium.launch({ headless: true });
+    const browser = process.env.BROWSERLESS_API_KEY
+      ? await chromium.connect({ wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}` })
+      : await chromium.launch({ headless: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     let allIssues: AIEnrichedIssue[] = [];
