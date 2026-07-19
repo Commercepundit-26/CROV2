@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const fileName = `audit-${jobId}.pptx`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('audits')
-      .upload(fileName, pptBuffer, { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', upsert: true });
+      .upload(fileName, pptBuffer, { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
       
     let downloadUrl = '';
     if (!uploadError) {
