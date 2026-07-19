@@ -10,7 +10,7 @@ import { AIEnrichedIssue } from '../../../../engines/pptEngine';
 import { chromium } from 'playwright';
 import { Client } from '@upstash/qstash';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 const qstashClient = new Client({ token: process.env.QSTASH_TOKEN || '', baseUrl: process.env.QSTASH_URL || 'https://qstash-us-east-1.upstash.io' });
 
 export async function POST(req: Request) {
@@ -31,7 +31,10 @@ export async function POST(req: Request) {
     if (false) { // MOCK DISABLED - NOW USING REAL ENGINE
       console.warn("Mock disabled.");
     } else {
-      const browser = await chromium.connect({ wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}` });
+      const browser = await chromium.connect({ 
+        wsEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_KEY}`,
+        timeout: 10000 // Force throw after 10s instead of hanging infinitely
+      });
       const context = await browser.newContext();
       const page = await context.newPage();
       
@@ -42,8 +45,8 @@ export async function POST(req: Request) {
         const evidenceMap = new Map<string, any>(); 
         let issues = await ruleEngine.evaluateAllRulesForPage(detectedPage, evidenceMap);
         
-        // Limit to top 3 issues per page to strictly avoid Vercel Serverless Function timeouts (60s limit)
-        issues = issues.slice(0, 3);
+        // Limit to 1 single issue for the MVP to strictly guarantee it stays under Vercel 60s limit
+        issues = issues.slice(0, 1);
         
         // Enhance with AI and Capture Screenshots sequentially to avoid Playwright collisions
         const enrichedIssues = [];
@@ -110,8 +113,9 @@ export async function POST(req: Request) {
 
     let comps = job.competitorUrls;
     if (!comps || comps.length === 0) {
-      const discovered = await discoverCompetitors(job.clientUrl);
-      comps = discovered.map(c => c.url);
+      // MVP: Skip real SERP discovery to save 20s of Serverless execution time
+      console.warn("Skipping SERP competitor discovery to avoid Vercel timeout.");
+      comps = [];
     }
     const missingFeatures = await compareWithCompetitors(allIssues, {}, []);
     
