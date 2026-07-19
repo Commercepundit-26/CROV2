@@ -25,7 +25,7 @@ export async function crawlSite(url: string, options?: { maxPages?: number }): P
       
       const page = await context.newPage();
       try {
-        await page.goto(currentUrl, { waitUntil: 'networkidle' });
+        await page.goto(currentUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
         
         const title = await page.title();
         const screenshot = await page.screenshot({ fullPage: false });

@@ -29,7 +29,7 @@ async function handler(req: Request) {
     await redis.set(`job:${jobId}`, job);
 
     // 1. Crawl
-    const crawlResult = await crawlSite(job.clientUrl, { maxPages: 2 });
+    const crawlResult = await crawlSite(job.clientUrl, { maxPages: 1 });
     job.progress = 30;
     await redis.set(`job:${jobId}`, job);
 
@@ -43,20 +43,22 @@ async function handler(req: Request) {
     let allIssues: AIEnrichedIssue[] = [];
     
     for (const pageData of crawlResult.pages) {
-      await page.goto(pageData.url);
+      await page.goto(pageData.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       const detectedPage = await detectPage(page, pageData.url);
       const evidenceMap = new Map<string, any>(); 
       const issues = await ruleEngine.evaluateAllRulesForPage(detectedPage, evidenceMap);
       
-      for (const issue of issues) {
+      const aiPromises = issues.map(async (issue) => {
         const rule = { id: issue.rule_id, version: '1', description: '', checks: [], required_evidence: [], ai_prompt_template: 'Analyze' };
         const aiExp = await generateExplanations([issue], rule, { actual: 'detected issue' });
-        allIssues.push({
+        return {
           ...issue,
           pageType: pageData.pageType,
           ai: aiExp[0]
-        });
-      }
+        };
+      });
+      const enrichedIssues = await Promise.all(aiPromises);
+      allIssues.push(...enrichedIssues);
     }
     await browser.close();
     
