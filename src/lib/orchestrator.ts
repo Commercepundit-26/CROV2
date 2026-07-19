@@ -3,7 +3,8 @@ import { Client } from '@upstash/qstash';
 import { AuditJob } from '../types/job';
 
 const qstashClient = new Client({
-  token: process.env.QSTASH_TOKEN || 'dummy'
+  token: process.env.QSTASH_TOKEN || '',
+  baseUrl: process.env.QSTASH_URL || 'https://qstash-us-east-1.upstash.io',
 });
 
 export async function startAudit(clientUrl: string, competitorUrls: string[], customInstructions: string): Promise<string> {
