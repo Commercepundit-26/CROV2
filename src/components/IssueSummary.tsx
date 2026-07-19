@@ -9,7 +9,7 @@ export function IssueSummary({ issue }: { issue: any }) {
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg text-[#0A66C2]">{issue.ai?.title || issue.title}</CardTitle>
           <Badge variant={isHigh ? "destructive" : "secondary"}>
-            {issue.severity.toUpperCase()}
+            {(issue.severity || 'medium').toUpperCase()}
           </Badge>
         </div>
       </CardHeader>

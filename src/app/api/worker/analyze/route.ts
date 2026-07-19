@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       allIssues = [{
         id: 'mock-1',
         rule_id: 'R1',
+        severity: 'high',
         description: 'Mock issue',
         element: 'div',
         recommendation: 'Mock fix',
