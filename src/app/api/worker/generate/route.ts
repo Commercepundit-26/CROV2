@@ -36,6 +36,9 @@ export async function POST(req: Request) {
     if (!uploadError) {
       const { data } = supabase.storage.from('audits').getPublicUrl(fileName);
       downloadUrl = data.publicUrl;
+    } else {
+      console.error("Supabase Upload Error:", uploadError);
+      downloadUrl = `upload_error: ${uploadError.message}`;
     }
 
     job.status = 'completed';

@@ -130,8 +130,9 @@ export async function generatePresentation(audit: AuditResult, templatePath?: st
   }
 
   // Generate buffer
-  const bufferArray = await pptx.write({ outputType: 'nodebuffer' });
-  return Buffer.from(bufferArray as any);
+  // Generate ArrayBuffer instead of Node Buffer for Vercel Serverless compatibility
+  const arrayBuffer = await pptx.write({ outputType: 'arraybuffer' });
+  return Buffer.from(arrayBuffer as ArrayBuffer);
 }
 
 // --- Test helper ---
